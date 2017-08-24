@@ -1,7 +1,12 @@
 const { createComponent, renderApp } = require('gruujs')
-const { browserHistory, route } = require('../src/index')
+const { browserHistory, route, routeSub } = require('../src/index')
 
 const timer = () => new Promise(resolve => setTimeout(resolve))
+
+const goTo = (elem, path) => {
+  elem._path = path
+  elem.click(path)
+}
 
 describe('routing', () => {
   let router
@@ -127,4 +132,98 @@ describe('routing', () => {
 
     done()
   }, 100)
+})
+
+describe('routeSub', () => {
+  const init = () => {
+    const fn = jest.fn()
+    document.body.innerHTML = '<div id="root"></div>'
+
+    routeSub('/hello/:id/:counter', (values) => {
+      fn(values)
+    })
+
+    const container = document.querySelector('#root')
+    renderApp(container, [{
+      _type: 'button',
+      onclick () {
+        browserHistory.goTo(this._node._path)
+      }
+    }])
+
+    return { fn }
+  }
+
+  test('runs on location change', async (done) => {
+    const { fn } = init()
+    expect(fn.mock.calls.length).toBe(0)
+
+    const buttonEl = document.querySelector('button')
+
+    goTo(buttonEl, '/hello/65/20')
+    expect(fn.mock.calls.length).toBe(1)
+    expect(fn.mock.calls[0][0]).toEqual({ id: '65', counter: '20' })
+
+    goTo(buttonEl, '/hello/12/33/dsf')
+    expect(fn.mock.calls.length).toBe(2)
+    expect(fn.mock.calls[1][0]).toEqual({ id: '12', counter: '33' })
+
+    goTo(buttonEl, '/test')
+    expect(fn.mock.calls.length).toBe(2)
+
+    done()
+  }, 150)
+})
+
+describe('onpopstate', () => {
+  const init = () => {
+    const fn = jest.fn()
+    document.body.innerHTML = '<div id="root"></div>'
+
+    routeSub('/test/:id$', (values) => {
+      fn(values)
+    })
+
+    const container = document.querySelector('#root')
+    renderApp(container, [{
+      _type: 'button',
+      children: route('/button', { _type: 'div', textContent: 'CLICK' }),
+      onclick () {
+        browserHistory.goTo(this._node._path)
+      }
+    }])
+
+    return { fn }
+  }
+
+  test('updates ui', async (done) => {
+    const { fn } = init()
+    expect(fn.mock.calls.length).toBe(0)
+
+    const buttonEl = document.querySelector('button')
+    expect(buttonEl.innerHTML).toBe('')
+
+    goTo(buttonEl, '/test/54')
+    expect(fn.mock.calls.length).toBe(1)
+    expect(fn.mock.calls[0][0]).toEqual({ id: '54' })
+    expect(buttonEl.innerHTML).toBe('')
+
+    goTo(buttonEl, '/button')
+    await timer()
+    expect(fn.mock.calls.length).toBe(1)
+    expect(buttonEl.innerHTML).toBe('<div>CLICK</div>')
+
+    goTo(buttonEl, '/test/54')
+    await timer()
+    expect(fn.mock.calls.length).toBe(2)
+    expect(fn.mock.calls[0][0]).toEqual({ id: '54' })
+    expect(buttonEl.innerHTML).toBe('')
+
+    goTo(buttonEl, '/button')
+    await timer()
+    expect(fn.mock.calls.length).toBe(2)
+    expect(buttonEl.innerHTML).toBe('<div>CLICK</div>')
+
+    done()
+  }, 150)
 })

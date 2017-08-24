@@ -2,6 +2,7 @@ const { createComponent } = typeof module !== 'undefined' ? require('gruujs') : 
 
 const GruuRouter = ((function () {
   const isPathCorrect = (regex, locationPath) => regex.test(locationPath)
+  const getParams = path => path.replace('$', '').split('/').map(v => (/:[^/]*/g).test(v) && v.slice(1))
   const getParamsValues = (path, params) => path
     .split('/')
     .reduce((acc, v, i) => Object.assign({}, acc, params[i] ? { [params[i]]: v } : {}))
@@ -14,22 +15,24 @@ const GruuRouter = ((function () {
     },
     goTo (path, popEvent) {
       browserHistory.state.locationPath = path
-      if (!popEvent) {
-        window.history.pushState(null, null, path)
-      }
+
       browserHistory.subs.forEach(([regex, params, fn]) => {
         if (isPathCorrect(regex, path)) {
           fn(getParamsValues(path, params))
         }
       })
+
+      if (!popEvent) {
+        window.history.pushState(null, null, path)
+      }
     },
     addSub (sub) {
-      this.subs.push(sub)
+      browserHistory.subs.push(sub)
     }
   })
 
   const route = (path, component) => {
-    const params = path.split('/').map(v => (/:[^/]*/g).test(v) && v.slice(1))
+    const params = getParams(path)
     const regex = getPathRegex(path)
     return createComponent({
       $children () {
@@ -46,9 +49,13 @@ const GruuRouter = ((function () {
   }
 
   const routeSub = (path, fn) => {
-    const params = path.split('/').map(v => (/:[^/]*/g).test(v) && v.slice(1))
+    const params = getParams(path)
     const regex = getPathRegex(path)
     browserHistory.addSub([regex, params, fn])
+    const currentPath = window.location.pathname
+    if (isPathCorrect(regex, currentPath)) {
+      fn(getParamsValues(currentPath, params))
+    }
   }
 
   window.onpopstate = () => {
