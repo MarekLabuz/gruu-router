@@ -1,4 +1,4 @@
-const { createComponent } = require('gruujs')
+const { createComponent } = typeof module !== 'undefined' ? require('gruujs') : Gruu
 
 const GruuRouter = ((function () {
   const isPathCorrect = (regex, locationPath) => regex.test(locationPath)

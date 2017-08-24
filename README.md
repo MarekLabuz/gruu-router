@@ -4,7 +4,7 @@ Routing utility library for Gruu
 
 https://gruujs.com/#routing
 
-https://www.npmjs.com/package/gruu-router
+https://www.npmjs.com/package/gruujs-router
 
 
 ### Gruu
