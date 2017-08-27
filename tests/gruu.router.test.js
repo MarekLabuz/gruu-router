@@ -1,5 +1,5 @@
 const { createComponent, renderApp } = require('gruujs')
-const { browserHistory, route, routeSub } = require('../src/index')
+const { router, route, routeSub } = require('../src/index')
 
 const timer = () => new Promise(resolve => setTimeout(resolve))
 
@@ -9,7 +9,7 @@ const goTo = (elem, path) => {
 }
 
 describe('routing', () => {
-  let router
+  let routerComp
   let page
 
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('routing', () => {
       textContent: text
     })
 
-    router = createComponent({
+    routerComp = createComponent({
       _type: 'div',
       children: [
         {
@@ -43,13 +43,13 @@ describe('routing', () => {
       _type: 'button',
       textContent: path,
       onclick () {
-        browserHistory.goTo(path)
+        router.goTo(path)
       }
     })
 
     const container = document.querySelector('#root')
     renderApp(container, [
-      router,
+      routerComp,
       button('/examples/playground'),
       button('/examples/playground/page1'),
       button('/examples/playground/page2')
@@ -63,7 +63,7 @@ describe('routing', () => {
   })
 
   test('content changes explicitly', () => {
-    router.children = [
+    routerComp.children = [
       page('page3'),
       {
         children: [
@@ -97,7 +97,7 @@ describe('routing', () => {
         '<button>/examples/playground</button>' +
         '<button>/examples/playground/page1</button><button>/examples/playground/page2</button></div>')
 
-    router.children = [
+    routerComp.children = [
       page('page3'),
       {
         children: [
@@ -147,7 +147,7 @@ describe('routeSub', () => {
     renderApp(container, [{
       _type: 'button',
       onclick () {
-        browserHistory.goTo(this._node._path)
+        router.goTo(this._node._path)
       }
     }])
 
@@ -189,7 +189,7 @@ describe('onpopstate', () => {
       _type: 'button',
       children: route('/button', { _type: 'div', textContent: 'CLICK' }),
       onclick () {
-        browserHistory.goTo(this._node._path)
+        router.goTo(this._node._path)
       }
     }])
 

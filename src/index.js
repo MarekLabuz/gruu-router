@@ -8,15 +8,15 @@ const GruuRouter = ((function () {
     .reduce((acc, v, i) => Object.assign({}, acc, params[i] ? { [params[i]]: v } : {}))
   const getPathRegex = path => new RegExp(`^${path.replace(/:[^/]*/g, '[^/]*')}`)
 
-  const browserHistory = createComponent({
+  const router = createComponent({
     subs: [],
     state: {
       locationPath: window.location.pathname
     },
     goTo (path, popEvent) {
-      browserHistory.state.locationPath = path
+      router.state.locationPath = path
 
-      browserHistory.subs.forEach(([regex, params, fn]) => {
+      router.subs.forEach(([regex, params, fn]) => {
         if (isPathCorrect(regex, path)) {
           fn(getParamsValues(path, params))
         }
@@ -27,7 +27,7 @@ const GruuRouter = ((function () {
       }
     },
     addSub (sub) {
-      browserHistory.subs.push(sub)
+      router.subs.push(sub)
     }
   })
 
@@ -36,7 +36,7 @@ const GruuRouter = ((function () {
     const regex = getPathRegex(path)
     return createComponent({
       $children () {
-        const currentPath = browserHistory.state.locationPath
+        const currentPath = router.state.locationPath
         if (isPathCorrect(regex, currentPath)) {
           const componentAsAFunction = typeof component === 'function'
           const values = !componentAsAFunction ? [] : getParamsValues(currentPath, params)
@@ -51,7 +51,7 @@ const GruuRouter = ((function () {
   const routeSub = (path, fn) => {
     const params = getParams(path)
     const regex = getPathRegex(path)
-    browserHistory.addSub([regex, params, fn])
+    router.addSub([regex, params, fn])
     const currentPath = window.location.pathname
     if (isPathCorrect(regex, currentPath)) {
       fn(getParamsValues(currentPath, params))
@@ -59,10 +59,10 @@ const GruuRouter = ((function () {
   }
 
   window.onpopstate = () => {
-    browserHistory.goTo(window.location.pathname, true)
+    router.goTo(window.location.pathname, true)
   }
 
-  return { browserHistory, route, routeSub }
+  return { router, route, routeSub }
 })())
 
 if (typeof module !== 'undefined') {
