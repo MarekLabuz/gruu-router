@@ -28,6 +28,9 @@ const GruuRouter = ((function () {
     },
     addSub (sub) {
       router.subs.push(sub)
+      return () => {
+        router.subs = router.subs.filter(s => s !== sub)
+      }
     }
   })
 
@@ -51,11 +54,13 @@ const GruuRouter = ((function () {
   const routeSub = (path, fn) => {
     const params = getParams(path)
     const regex = getPathRegex(path)
-    router.addSub([regex, params, fn])
     const currentPath = window.location.pathname
     if (isPathCorrect(regex, currentPath)) {
-      fn(getParamsValues(currentPath, params))
+      setTimeout(() => {
+        fn(getParamsValues(currentPath, params))
+      })
     }
+    return router.addSub([regex, params, fn])
   }
 
   window.onpopstate = () => {
