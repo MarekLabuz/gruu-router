@@ -227,3 +227,94 @@ describe('onpopstate', () => {
     done()
   }, 150)
 })
+
+describe('regex', () => {
+  const init = () => {
+    document.body.innerHTML = '<div id="root"></div>'
+
+    const app = createComponent({
+      _type: 'div',
+      children: [
+        route('/test/:id/:counter', ({ id, counter }) => ({ _type: 'div', textContent: id + counter })),
+        route('^/test/:id/:counter$', ({ id, counter }) => ({ children: id + counter }))
+      ]
+    })
+
+    const container = document.querySelector('#root')
+    renderApp(container, [app, {
+      _type: 'button',
+      onclick () {
+        router.goTo(this._node._path)
+      }
+    }])
+  }
+
+  test('matches path', async (done) => {
+    init()
+    const buttonEl = document.querySelector('button')
+    expect(document.body.innerHTML).toBe('<div id="root"><div></div><button></button></div>')
+
+    goTo(buttonEl, '/test/50')
+    await timer()
+    expect(document.body.innerHTML).toBe('<div id="root"><div></div><button></button></div>')
+
+    goTo(buttonEl, '/test/12/43')
+    await timer()
+    expect(document.body.innerHTML).toBe('<div id="root"><div><div>1243</div>1243</div><button></button></div>')
+
+    goTo(buttonEl, '/test2/test/56/90')
+    await timer()
+    expect(document.body.innerHTML).toBe('<div id="root"><div><div>5690</div></div><button></button></div>')
+
+    goTo(buttonEl, '/test/22/11/9')
+    await timer()
+    expect(document.body.innerHTML).toBe('<div id="root"><div><div>2211</div></div><button></button></div>')
+
+    goTo(buttonEl, '/test/22')
+    await timer()
+    expect(document.body.innerHTML).toBe('<div id="root"><div></div><button></button></div>')
+
+    done()
+  }, 150)
+})
+
+describe('unsubscribe', () => {
+  const init = () => {
+    const fn = jest.fn()
+
+    document.body.innerHTML = '<div id="root"></div>'
+
+    const unsub = routeSub('/test', () => {
+      fn()
+      unsub()
+    })
+
+    const container = document.querySelector('#root')
+    renderApp(container, [{
+      _type: 'button',
+      onclick () {
+        router.goTo(this._node._path)
+      }
+    }])
+
+    return { fn }
+  }
+
+  test('removes listener', async (done) => {
+    const { fn } = init()
+    const buttonEl = document.querySelector('button')
+
+    expect(fn.mock.calls.length).toBe(0)
+    goTo(buttonEl, '/test')
+    await timer()
+    expect(fn.mock.calls.length).toBe(1)
+    goTo(buttonEl, '/hello')
+    await timer()
+    expect(fn.mock.calls.length).toBe(1)
+    goTo(buttonEl, '/test')
+    await timer()
+    expect(fn.mock.calls.length).toBe(1)
+
+    done()
+  }, 150)
+})
