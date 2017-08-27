@@ -1,6 +1,6 @@
 {
   "name": "gruujs-router",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Routing utility library for Gruu",
   "main": "src/index.js",
   "scripts": {
