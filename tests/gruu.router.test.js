@@ -1,4 +1,4 @@
-const { createComponent, renderApp } = require('gruujs')
+const Gruu = require('gruujs')
 const { router, route, routeSub } = require('../src/index')
 
 const timer = () => new Promise(resolve => setTimeout(resolve))
@@ -15,12 +15,12 @@ describe('routing', () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="root"></div>'
 
-    page = text => createComponent({
+    page = text => Gruu.createComponent({
       _type: 'span',
       textContent: text
     })
 
-    routerComp = createComponent({
+    routerComp = Gruu.createComponent({
       _type: 'div',
       children: [
         {
@@ -39,7 +39,7 @@ describe('routing', () => {
       ]
     })
 
-    const button = path => createComponent({
+    const button = path => Gruu.createComponent({
       _type: 'button',
       textContent: path,
       onclick () {
@@ -48,7 +48,7 @@ describe('routing', () => {
     })
 
     const container = document.querySelector('#root')
-    renderApp(container, [
+    Gruu.renderApp(container, [
       routerComp,
       button('/examples/playground'),
       button('/examples/playground/page1'),
@@ -144,10 +144,10 @@ describe('routeSub', () => {
     })
 
     const container = document.querySelector('#root')
-    renderApp(container, [{
+    Gruu.renderApp(container, [{
       _type: 'button',
       onclick () {
-        router.goTo(this._node._path)
+        router.goTo(this._n._path)
       }
     }])
 
@@ -185,11 +185,11 @@ describe('onpopstate', () => {
     })
 
     const container = document.querySelector('#root')
-    renderApp(container, [{
+    Gruu.renderApp(container, [{
       _type: 'button',
       children: route('/button', { _type: 'div', textContent: 'CLICK' }),
       onclick () {
-        router.goTo(this._node._path)
+        router.goTo(this._n._path)
       }
     }])
 
@@ -232,7 +232,7 @@ describe('regex', () => {
   const init = () => {
     document.body.innerHTML = '<div id="root"></div>'
 
-    const app = createComponent({
+    const app = Gruu.createComponent({
       _type: 'div',
       children: [
         route('/test/:id/:counter', ({ id, counter }) => ({ _type: 'div', textContent: id + counter })),
@@ -241,10 +241,10 @@ describe('regex', () => {
     })
 
     const container = document.querySelector('#root')
-    renderApp(container, [app, {
+    Gruu.renderApp(container, [app, {
       _type: 'button',
       onclick () {
-        router.goTo(this._node._path)
+        router.goTo(this._n._path)
       }
     }])
   }
@@ -290,10 +290,10 @@ describe('unsubscribe', () => {
     })
 
     const container = document.querySelector('#root')
-    renderApp(container, [{
+    Gruu.renderApp(container, [{
       _type: 'button',
       onclick () {
-        router.goTo(this._node._path)
+        router.goTo(this._n._path)
       }
     }])
 

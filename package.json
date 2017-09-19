@@ -24,7 +24,7 @@
   "homepage": "https://gruujs.com",
   "license": "MIT",
   "dependencies": {
-    "gruujs": "*"
+    "gruujs": "^1.7.1"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",

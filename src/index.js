@@ -40,7 +40,6 @@ const GruuRouter = ((function () {
     return createComponent({
       $children () {
         const currentPath = router.state.locationPath
-        // console.log(regex, currentPath)
         if (isPathCorrect(regex, currentPath)) {
           const componentAsAFunction = typeof component === 'function'
           const values = !componentAsAFunction ? [] : getParamsValues(currentPath, regex, params)
